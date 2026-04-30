@@ -1,0 +1,31 @@
+.emptyState {
+  align-items: center;
+  background-color: var(--color-gray-100);
+  border: 1px dashed var(--color-gray-200);
+  border-radius: var(--radius-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-12);
+  text-align: center;
+}
+
+.icon {
+  color: var(--color-magenta);
+}
+
+.title {
+  color: var(--color-gray-800);
+  font-size: var(--text-xl);
+  font-weight: var(--font-semibold);
+}
+
+.message {
+  color: var(--color-gray-600);
+  font-size: var(--text-base);
+  max-width: 480px;
+}
+
+.action {
+  margin-top: var(--space-2);
+}

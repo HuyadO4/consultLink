@@ -1,0 +1,98 @@
+.header {
+  background-color: var(--color-white);
+  border-bottom: 1px solid var(--color-gray-200);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.inner {
+  align-items: center;
+  display: flex;
+  gap: var(--space-6);
+  justify-content: space-between;
+  margin: 0 auto;
+  max-width: 1200px;
+  padding: var(--space-4) var(--space-6);
+}
+
+.logo {
+  color: var(--color-black);
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+}
+
+.nav {
+  display: flex;
+  gap: var(--space-6);
+}
+
+.link {
+  border-bottom: 2px solid transparent;
+  color: var(--color-gray-600);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  padding-bottom: var(--space-1);
+}
+
+.active {
+  border-bottom-color: var(--color-magenta);
+  color: var(--color-black);
+}
+
+.actions {
+  align-items: center;
+  display: flex;
+  gap: var(--space-4);
+}
+
+.notification {
+  align-items: center;
+  display: flex;
+  position: relative;
+}
+
+.notificationIcon {
+  color: var(--color-gray-600);
+  font-size: var(--text-sm);
+}
+
+.notificationBadge {
+  align-items: center;
+  background-color: var(--color-magenta);
+  border-radius: var(--radius-full);
+  color: var(--color-white);
+  display: inline-flex;
+  font-size: var(--text-xs);
+  height: 18px;
+  justify-content: center;
+  min-width: 18px;
+  padding: 0 var(--space-1);
+  position: absolute;
+  right: -12px;
+  top: -8px;
+}
+
+.avatar {
+  align-items: center;
+  background-color: var(--color-gray-100);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-full);
+  color: var(--color-gray-800);
+  display: inline-flex;
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  height: 40px;
+  justify-content: center;
+  width: 40px;
+}
+
+@media (max-width: 768px) {
+  .inner {
+    padding: var(--space-4);
+  }
+
+  .nav {
+    display: none;
+  }
+}
