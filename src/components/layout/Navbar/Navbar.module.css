@@ -87,6 +87,16 @@
   width: 40px;
 }
 
+.logoutButton {
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-full);
+  color: var(--color-gray-800);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  min-height: 40px;
+  padding: 0 var(--space-4);
+}
+
 @media (max-width: 768px) {
   .inner {
     padding: var(--space-4);
@@ -94,5 +104,13 @@
 
   .nav {
     display: none;
+  }
+
+  .actions {
+    gap: var(--space-2);
+  }
+
+  .logoutButton {
+    padding: 0 var(--space-3);
   }
 }

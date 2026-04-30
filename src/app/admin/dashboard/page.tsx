@@ -23,7 +23,7 @@ export default async function AdminDashboardPage() {
 
   return (
     <>
-      <Navbar />
+      <Navbar isAuthenticated role="admin" />
       <PageContainer title="Admin Dashboard">
         <div className={styles.layout}>
           <Card>

@@ -23,7 +23,7 @@ export default async function ConsultantDashboardPage() {
 
   return (
     <>
-      <Navbar />
+      <Navbar isAuthenticated role="consultant" />
       <PageContainer title="Consultant Dashboard">
         <div className={styles.layout}>
           <Card>

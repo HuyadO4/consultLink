@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useMemo, useState } from "react";
 import { Navbar } from "@/components/layout/Navbar/Navbar";
 import { PageContainer } from "@/components/layout/PageContainer/PageContainer";
@@ -13,6 +13,7 @@ import styles from "./page.module.css";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = useMemo(() => createClient(), []);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -76,6 +77,14 @@ export default function LoginPage() {
         .select("role")
         .eq("id", user.id)
         .maybeSingle();
+
+      const nextPath = searchParams.get("next");
+
+      if (nextPath && nextPath.startsWith("/")) {
+        router.push(nextPath);
+        router.refresh();
+        return;
+      }
 
       if (profile?.role === "admin") {
         router.push("/admin/dashboard");

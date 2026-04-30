@@ -1,0 +1,116 @@
+.layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.formCard,
+.scheduleCard {
+  background-color: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-6);
+}
+
+.heading {
+  color: var(--color-gray-800);
+  font-size: var(--text-xl);
+  font-weight: var(--font-semibold);
+  margin-bottom: var(--space-5);
+}
+
+.formGrid {
+  display: grid;
+  gap: var(--space-5);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: var(--space-5);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.label {
+  color: var(--color-gray-800);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+}
+
+.input,
+.select {
+  background-color: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  min-height: 48px;
+  outline: none;
+  padding: 0 var(--space-4);
+}
+
+.input:focus,
+.select:focus {
+  border-color: var(--color-magenta);
+  box-shadow: 0 0 0 2px var(--color-magenta-light);
+}
+
+.errorText {
+  color: var(--color-error);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-4);
+}
+
+.days {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.dayColumn {
+  background-color: var(--color-gray-100);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+}
+
+.dayTitle {
+  color: var(--color-gray-800);
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  margin-bottom: var(--space-3);
+}
+
+.slotList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.slotItem {
+  align-items: center;
+  background-color: var(--color-white);
+  border-radius: var(--radius-md);
+  color: var(--color-gray-800);
+  display: flex;
+  font-size: var(--text-sm);
+  justify-content: space-between;
+  padding: var(--space-3);
+}
+
+.deleteButton {
+  color: var(--color-error);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+}
+
+.emptyText {
+  color: var(--color-gray-600);
+  font-size: var(--text-sm);
+}
+
+@media (max-width: 900px) {
+  .formGrid,
+  .days {
+    grid-template-columns: 1fr;
+  }
+}

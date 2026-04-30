@@ -23,7 +23,7 @@ export default async function UserDashboardPage() {
 
   return (
     <>
-      <Navbar />
+      <Navbar isAuthenticated role="customer" />
       <PageContainer title="Customer Dashboard">
         <div className={styles.layout}>
           <Card>

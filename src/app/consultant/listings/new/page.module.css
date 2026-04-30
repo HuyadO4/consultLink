@@ -1,0 +1,21 @@
+.layout {
+  padding-bottom: var(--space-16);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-8);
+}
+
+.heading {
+  color: var(--color-gray-800);
+  font-size: var(--text-2xl);
+  font-weight: var(--font-semibold);
+}
+
+.copy {
+  color: var(--color-gray-600);
+  font-size: var(--text-base);
+}
