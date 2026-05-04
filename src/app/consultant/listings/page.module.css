@@ -64,9 +64,20 @@
   font-size: var(--text-sm);
 }
 
+.actionCell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
 .actionLink {
   color: var(--color-magenta);
   font-weight: var(--font-semibold);
+}
+
+.rejectionReason {
+  color: var(--color-error);
+  font-size: var(--text-xs);
 }
 
 @media (max-width: 768px) {

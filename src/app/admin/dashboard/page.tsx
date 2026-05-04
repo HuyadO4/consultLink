@@ -17,9 +17,28 @@ export default async function AdminDashboardPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name")
+    .select("full_name, is_suspended")
     .eq("id", user.id)
     .maybeSingle();
+
+  if (profile?.is_suspended) {
+    redirect("/login?suspended=1");
+  }
+
+  const today = new Date().toISOString().slice(0, 10);
+
+  const [{ count: pendingListingsCount }, { count: bookingsTodayCount }, { count: usersCount }] =
+    await Promise.all([
+      supabase
+        .from("listings")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "pending"),
+      supabase
+        .from("bookings")
+        .select("*", { count: "exact", head: true })
+        .eq("scheduled_date", today),
+      supabase.from("profiles").select("*", { count: "exact", head: true }),
+    ]);
 
   return (
     <>
@@ -31,31 +50,31 @@ export default async function AdminDashboardPage() {
               <p className={styles.eyebrow}>Welcome back</p>
               <h2 className={styles.name}>{profile?.full_name ?? user.email ?? "Admin"}</h2>
               <p className={styles.description}>
-                Review listings, monitor platform activity, and manage users from a single control point.
+                Review the queue, monitor activity, and keep the marketplace trustworthy.
               </p>
             </div>
           </Card>
 
-          <div className={styles.grid}>
+          <section className={styles.metricsGrid}>
             <Card>
-              <div className={styles.sectionCard}>
-                <h3 className={styles.sectionTitle}>Listings pending review</h3>
-                <p className={styles.sectionText}>This section will be completed in the next iteration.</p>
+              <div className={styles.metricCard}>
+                <p className={styles.metricLabel}>Listings pending review</p>
+                <p className={styles.metricValue}>{pendingListingsCount ?? 0}</p>
               </div>
             </Card>
             <Card>
-              <div className={styles.sectionCard}>
-                <h3 className={styles.sectionTitle}>Platform activity</h3>
-                <p className={styles.sectionText}>This section will be completed in the next iteration.</p>
+              <div className={styles.metricCard}>
+                <p className={styles.metricLabel}>Bookings today</p>
+                <p className={styles.metricValue}>{bookingsTodayCount ?? 0}</p>
               </div>
             </Card>
             <Card>
-              <div className={styles.sectionCard}>
-                <h3 className={styles.sectionTitle}>User management</h3>
-                <p className={styles.sectionText}>This section will be completed in the next iteration.</p>
+              <div className={styles.metricCard}>
+                <p className={styles.metricLabel}>Total registered users</p>
+                <p className={styles.metricValue}>{usersCount ?? 0}</p>
               </div>
             </Card>
-          </div>
+          </section>
         </div>
       </PageContainer>
     </>

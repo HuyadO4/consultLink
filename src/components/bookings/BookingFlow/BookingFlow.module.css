@@ -1,0 +1,103 @@
+.triggerButton {
+  width: 100%;
+}
+
+.modalBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.stepLabel {
+  color: var(--color-magenta);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  text-transform: uppercase;
+}
+
+.metaText,
+.summaryLabel {
+  color: var(--color-gray-600);
+}
+
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.summaryCard,
+.fieldset,
+.paymentState {
+  background-color: var(--color-gray-100);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+}
+
+.summaryLabel {
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-1);
+}
+
+.summaryValue,
+.paymentTitle,
+.legend,
+.totalRow {
+  color: var(--color-gray-800);
+}
+
+.summaryValue,
+.paymentTitle,
+.legend {
+  font-weight: var(--font-semibold);
+}
+
+.fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.legend {
+  font-size: var(--text-sm);
+}
+
+.option {
+  align-items: center;
+  display: flex;
+  gap: var(--space-2);
+}
+
+.totalRow {
+  align-items: center;
+  display: flex;
+  font-size: var(--text-lg);
+  justify-content: space-between;
+}
+
+.paymentState {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-height: 140px;
+  justify-content: center;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.errorText {
+  color: var(--color-error);
+  font-size: var(--text-sm);
+}
+
+@media (max-width: 640px) {
+  .footer {
+    flex-direction: column-reverse;
+    gap: var(--space-3);
+  }
+}

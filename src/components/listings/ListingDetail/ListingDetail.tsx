@@ -1,6 +1,7 @@
 import Link from "next/link";
+import { BookingFlow } from "@/components/bookings/BookingFlow/BookingFlow";
+import { formatTime, getDayLabel } from "@/lib/utils/date";
 import { formatPrice } from "@/lib/utils/format";
-import { getDayLabel } from "@/lib/utils/date";
 import type { AvailabilitySlot, Listing, Review } from "@/types";
 import styles from "./ListingDetail.module.css";
 
@@ -28,6 +29,7 @@ export function ListingDetail({
 }: ListingDetailProps) {
   const averageRating = getAverageRating(reviews);
   const consultantName = listing.consultant?.full_name ?? "Consultant";
+  const avatarUrl = listing.consultant?.avatar_url ?? null;
 
   return (
     <div className={styles.layout}>
@@ -52,13 +54,19 @@ export function ListingDetail({
             </div>
             <h1 className={styles.title}>{listing.title}</h1>
             <div className={styles.consultantRow}>
-              <div className={styles.avatar}>{consultantName.slice(0, 1).toUpperCase()}</div>
+              {avatarUrl ? (
+                <img alt={consultantName} className={styles.avatarImage} src={avatarUrl} />
+              ) : (
+                <div className={styles.avatar}>{consultantName.slice(0, 1).toUpperCase()}</div>
+              )}
               <div>
                 <p className={styles.consultantName}>{consultantName}</p>
-                <p className={styles.metaText}>
-                  {averageRating ? `${averageRating} stars` : "No reviews yet"} ·{" "}
-                  {reviews.length} review{reviews.length === 1 ? "" : "s"}
-                </p>
+                {averageRating ? (
+                  <p className={styles.metaText}>
+                    {averageRating} stars · {reviews.length} review
+                    {reviews.length === 1 ? "" : "s"}
+                  </p>
+                ) : null}
               </div>
             </div>
           </div>
@@ -76,13 +84,15 @@ export function ListingDetail({
                   <div className={styles.availabilityItem} key={slot.id}>
                     <span>{getDayLabel(slot.day_of_week)}</span>
                     <span>
-                      {slot.start_time.slice(0, 5)} - {slot.end_time.slice(0, 5)}
+                      {formatTime(slot.start_time)} - {formatTime(slot.end_time)}
                     </span>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className={styles.metaText}>Availability will be added by the consultant soon.</p>
+              <p className={styles.metaText}>
+                This consultant has not set their availability yet.
+              </p>
             )}
           </section>
 
@@ -110,7 +120,7 @@ export function ListingDetail({
                 ))}
               </div>
             ) : (
-              <p className={styles.metaText}>No reviews yet.</p>
+              <p className={styles.metaText}>No reviews yet. Be the first to book.</p>
             )}
           </section>
         </div>
@@ -122,9 +132,18 @@ export function ListingDetail({
             <p className={styles.metaText}>{listing.location}</p>
 
             {isAuthenticated ? (
-              <button className={styles.ctaButton} type="button">
-                Booking starts in Iteration 3
-              </button>
+              <BookingFlow
+                hasAvailability={availability.length > 0}
+                listing={{
+                  consultationType: listing.consultation_type,
+                  consultantName,
+                  durationMinutes: listing.duration_minutes,
+                  id: listing.id,
+                  location: listing.location,
+                  price: listing.price,
+                  title: listing.title,
+                }}
+              />
             ) : (
               <Link className={styles.ctaButton} href={`/login?next=/listings/${listing.id}`}>
                 Book Consultation

@@ -2,16 +2,20 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, Suspense, useMemo, useState } from "react";
 import { Navbar } from "@/components/layout/Navbar/Navbar";
 import { PageContainer } from "@/components/layout/PageContainer/PageContainer";
 import { Button } from "@/components/ui/Button/Button";
 import { Card } from "@/components/ui/Card/Card";
 import { Input } from "@/components/ui/Input/Input";
 import { createClient } from "@/lib/supabase/client";
+import {
+  SUPABASE_CONNECTIVITY_MESSAGE,
+  isSupabaseConnectivityError,
+} from "@/lib/supabase/errors";
 import styles from "./page.module.css";
 
-export default function LoginPage() {
+function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = useMemo(() => createClient(), []);
@@ -21,6 +25,7 @@ export default function LoginPage() {
   const [passwordError, setPasswordError] = useState("");
   const [formError, setFormError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const suspendedMessage = "Your account has been suspended. Please contact support.";
 
   function validateForm() {
     let valid = true;
@@ -74,9 +79,15 @@ export default function LoginPage() {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("role")
+        .select("role, is_suspended")
         .eq("id", user.id)
         .maybeSingle();
+
+      if (profile?.is_suspended) {
+        await supabase.auth.signOut();
+        setFormError(suspendedMessage);
+        return;
+      }
 
       const nextPath = searchParams.get("next");
 
@@ -97,7 +108,11 @@ export default function LoginPage() {
       router.refresh();
     } catch (error) {
       console.error(error);
-      setFormError("Something went wrong. Please try again.");
+      setFormError(
+        isSupabaseConnectivityError(error)
+          ? SUPABASE_CONNECTIVITY_MESSAGE
+          : "Something went wrong. Please try again."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -139,6 +154,9 @@ export default function LoginPage() {
                 value={password}
               />
 
+              {searchParams.get("suspended") === "1" && !formError ? (
+                <p className={styles.formError}>{suspendedMessage}</p>
+              ) : null}
               {formError ? <p className={styles.formError}>{formError}</p> : null}
 
               <Button loading={isSubmitting} type="submit">
@@ -156,5 +174,29 @@ export default function LoginPage() {
         </div>
       </PageContainer>
     </>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <>
+          <Navbar currentPath="/login" />
+          <PageContainer>
+            <div className={styles.wrapper}>
+              <Card className={styles.card}>
+                <div className={styles.header}>
+                  <h1 className={styles.title}>Welcome back</h1>
+                  <p className={styles.subtitle}>Loading login form...</p>
+                </div>
+              </Card>
+            </div>
+          </PageContainer>
+        </>
+      }
+    >
+      <LoginPageContent />
+    </Suspense>
   );
 }

@@ -78,6 +78,13 @@
   width: 36px;
 }
 
+.avatarImage {
+  border-radius: var(--radius-full);
+  height: 36px;
+  object-fit: cover;
+  width: 36px;
+}
+
 .consultantName {
   color: var(--color-gray-600);
   font-size: var(--text-sm);
@@ -119,6 +126,12 @@
   color: var(--color-gray-600);
   font-size: var(--text-sm);
   text-transform: capitalize;
+}
+
+.rating {
+  color: var(--color-gray-600);
+  font-size: var(--text-xs);
+  margin-top: var(--space-2);
 }
 
 .action {

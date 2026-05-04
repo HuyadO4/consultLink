@@ -5,7 +5,8 @@
   padding-bottom: var(--space-16);
 }
 
-.welcome {
+.welcome,
+.metricCard {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
@@ -18,44 +19,100 @@
   text-transform: uppercase;
 }
 
-.name {
+.name,
+.sectionTitle,
+.bookingTitle,
+.metricValue {
   color: var(--color-gray-800);
+}
+
+.name {
   font-size: var(--text-2xl);
   font-weight: var(--font-bold);
 }
 
-.description {
+.description,
+.sectionText,
+.bookingMeta,
+.metricLabel {
   color: var(--color-gray-600);
-  font-size: var(--text-base);
-  max-width: 720px;
 }
 
-.grid {
+.metricsGrid {
   display: grid;
   gap: var(--space-6);
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-.sectionCard {
+.metricLabel {
+  font-size: var(--text-sm);
+}
+
+.metricValue {
+  font-size: var(--text-4xl);
+  font-weight: var(--font-bold);
+}
+
+.section {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-  min-height: 160px;
+  gap: var(--space-5);
+}
+
+.sectionHeader,
+.bookingRow {
+  align-items: center;
+  display: flex;
+  gap: var(--space-4);
+  justify-content: space-between;
 }
 
 .sectionTitle {
-  color: var(--color-gray-800);
+  font-size: var(--text-xl);
+  font-weight: var(--font-semibold);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.bookingTitle {
   font-size: var(--text-lg);
   font-weight: var(--font-semibold);
 }
 
-.sectionText {
-  color: var(--color-gray-600);
+.bookingStatus {
+  color: var(--color-success);
   font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+}
+
+.primaryLink {
+  align-items: center;
+  background-color: var(--color-magenta);
+  border-radius: var(--radius-full);
+  color: var(--color-white);
+  display: inline-flex;
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 var(--space-5);
+  text-align: center;
 }
 
 @media (max-width: 900px) {
-  .grid {
+  .metricsGrid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .sectionHeader,
+  .bookingRow {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }

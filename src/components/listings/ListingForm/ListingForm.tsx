@@ -21,6 +21,7 @@ const CATEGORIES = [
 
 const DURATIONS = [30, 60, 90, 120] as const;
 const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const IMAGE_ERROR_MESSAGE = "Please upload a JPG, PNG, or WebP image under 5MB.";
 
 interface ListingFormProps {
   consultantId: string;
@@ -40,6 +41,7 @@ export function ListingForm({ consultantId }: ListingFormProps) {
   const [durationMinutes, setDurationMinutes] = useState<number>(60);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [imageError, setImageError] = useState("");
   const [formError, setFormError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -55,17 +57,10 @@ export function ListingForm({ consultantId }: ListingFormProps) {
       return;
     }
 
-    if (!IMAGE_TYPES.includes(nextFile.type)) {
+    if (!IMAGE_TYPES.includes(nextFile.type) || nextFile.size > 5 * 1024 * 1024) {
       setImageFile(null);
       setImagePreview("");
-      setImageError("Please upload a JPG, PNG, or WEBP image.");
-      return;
-    }
-
-    if (nextFile.size > 5 * 1024 * 1024) {
-      setImageFile(null);
-      setImagePreview("");
-      setImageError("Featured image must be 5MB or smaller.");
+      setImageError(IMAGE_ERROR_MESSAGE);
       return;
     }
 
@@ -75,33 +70,33 @@ export function ListingForm({ consultantId }: ListingFormProps) {
   }
 
   function validateForm() {
+    const nextErrors: Record<string, string> = {};
+
     if (!title.trim()) {
-      setFormError("Please add a listing title.");
-      return false;
+      nextErrors.title = "Please add a listing title.";
     }
 
     if (description.trim().length < 100) {
-      setFormError("Description must be at least 100 characters.");
-      return false;
+      nextErrors.description = "Description must be at least 100 characters.";
     }
 
     if (!price || Number(price) <= 0) {
-      setFormError("Please enter a valid price in NGN.");
-      return false;
+      nextErrors.price = "Please enter a valid price in NGN.";
     }
 
     if (!location.trim()) {
-      setFormError("Please enter a location.");
-      return false;
+      nextErrors.location = "Please enter a location.";
     }
 
     if (!imageFile) {
-      setFormError("Please upload a featured image.");
-      return false;
+      nextErrors.image = IMAGE_ERROR_MESSAGE;
+      setImageError(IMAGE_ERROR_MESSAGE);
     }
 
-    setFormError("");
-    return true;
+    setErrors(nextErrors);
+    setFormError(Object.keys(nextErrors).length > 0 ? "Please fix the highlighted fields." : "");
+
+    return Object.keys(nextErrors).length === 0;
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -167,10 +162,7 @@ export function ListingForm({ consultantId }: ListingFormProps) {
         return;
       }
 
-      await supabase
-        .from("profiles")
-        .update({ role: "consultant" })
-        .eq("id", user.id);
+      await supabase.from("profiles").update({ role: "consultant" }).eq("id", user.id);
 
       setUploadProgress(100);
       router.push("/consultant/listings?created=1");
@@ -187,6 +179,7 @@ export function ListingForm({ consultantId }: ListingFormProps) {
     <form className={styles.form} onSubmit={handleSubmit}>
       <div className={styles.grid}>
         <Input
+          error={errors.title}
           label="Title"
           name="title"
           onChange={(event) => setTitle(event.target.value)}
@@ -211,6 +204,7 @@ export function ListingForm({ consultantId }: ListingFormProps) {
 
         <div className={styles.fullWidth}>
           <Input
+            error={errors.description}
             label="Description"
             multiline
             name="description"
@@ -221,6 +215,7 @@ export function ListingForm({ consultantId }: ListingFormProps) {
         </div>
 
         <Input
+          error={errors.price}
           label="Price (NGN)"
           min="0"
           name="price"
@@ -231,6 +226,7 @@ export function ListingForm({ consultantId }: ListingFormProps) {
         />
 
         <Input
+          error={errors.location}
           label="Location"
           name="location"
           onChange={(event) => setLocation(event.target.value)}
@@ -288,9 +284,7 @@ export function ListingForm({ consultantId }: ListingFormProps) {
       <div className={styles.uploadSection}>
         <div className={styles.uploadHeader}>
           <h2 className={styles.uploadTitle}>Featured image</h2>
-          <p className={styles.uploadCopy}>
-            Upload a JPG, PNG, or WEBP image up to 5MB.
-          </p>
+          <p className={styles.uploadCopy}>Upload a JPG, PNG, or WebP image under 5MB.</p>
         </div>
 
         <label className={styles.uploadBox}>

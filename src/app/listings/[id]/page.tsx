@@ -25,7 +25,7 @@ interface ListingQueryRow {
   status: "pending" | "approved" | "rejected";
   created_at: string;
   updated_at: string;
-  consultant: Pick<Profile, "full_name"> | null;
+  consultant: Array<Pick<Profile, "full_name" | "avatar_url">>;
 }
 
 interface ReviewRow {
@@ -37,7 +37,7 @@ interface ReviewRow {
   rating: number;
   comment: string | null;
   created_at: string;
-  customer: Pick<Profile, "full_name"> | null;
+  customer: Array<Pick<Profile, "full_name">>;
 }
 
 export default async function ListingPage({ params }: ListingPageProps) {
@@ -50,7 +50,7 @@ export default async function ListingPage({ params }: ListingPageProps) {
   const { data: listingData } = await supabase
     .from("listings")
     .select(
-      "id, consultant_id, title, description, price, category, location, featured_image_url, consultation_type, duration_minutes, status, created_at, updated_at, consultant:profiles(full_name)"
+      "id, consultant_id, title, description, price, category, location, featured_image_url, consultation_type, duration_minutes, status, created_at, updated_at, consultant:profiles(full_name, avatar_url)"
     )
     .eq("id", id)
     .eq("status", "approved")
@@ -76,25 +76,28 @@ export default async function ListingPage({ params }: ListingPageProps) {
     .eq("listing_id", id)
     .order("created_at", { ascending: false });
 
+  const listingRow = listingData as ListingQueryRow;
+  const consultant = listingRow.consultant[0];
   const listing: Listing = {
-    ...(listingData as ListingQueryRow),
-    consultant: listingData.consultant
+    ...listingRow,
+    consultant: consultant
       ? ({
-          full_name: listingData.consultant.full_name,
+          avatar_url: consultant.avatar_url,
+          full_name: consultant.full_name,
         } as Profile)
       : undefined,
   };
 
   const availability: AvailabilitySlot[] = availabilityData ?? [];
   const reviews: Review[] =
-    reviewsData?.map((review: ReviewRow) => ({
+    ((reviewsData as ReviewRow[] | null) ?? []).map((review) => ({
       ...review,
-      customer: review.customer
+      customer: review.customer[0]
         ? ({
-            full_name: review.customer.full_name,
+            full_name: review.customer[0].full_name,
           } as Profile)
         : undefined,
-    })) ?? [];
+    }));
 
   return (
     <>

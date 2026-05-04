@@ -23,9 +23,6 @@ function getLinks(role: UserRole | null, isAuthenticated: boolean) {
   if (role === "admin") {
     return [
       { href: "/admin/dashboard", label: "Dashboard" },
-      { href: "/admin/listings", label: "Listings" },
-      { href: "/admin/bookings", label: "Bookings" },
-      { href: "/admin/users", label: "Users" },
     ];
   }
 
@@ -35,15 +32,13 @@ function getLinks(role: UserRole | null, isAuthenticated: boolean) {
       { href: "/consultant/listings", label: "Listings" },
       { href: "/consultant/listings/new", label: "New Listing" },
       { href: "/consultant/availability", label: "Availability" },
-      { href: "/consultant/bookings", label: "Bookings" },
     ];
   }
 
   return [
     { href: "/user/dashboard", label: "Dashboard" },
-    { href: "/listings", label: "Browse Listings" },
     { href: "/user/bookings", label: "Bookings" },
-    { href: "/user/notifications", label: "Notifications" },
+    { href: "/listings", label: "Browse Listings" },
   ];
 }
 

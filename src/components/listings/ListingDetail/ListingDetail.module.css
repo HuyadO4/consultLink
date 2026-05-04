@@ -97,6 +97,13 @@
   width: 48px;
 }
 
+.avatarImage {
+  border-radius: var(--radius-full);
+  height: 48px;
+  object-fit: cover;
+  width: 48px;
+}
+
 .consultantName,
 .sectionTitle,
 .price,

@@ -17,6 +17,7 @@ interface ConsultantListingsPageProps {
 
 interface ListingRow {
   id: string;
+  rejection_reason: string | null;
   title: string;
   status: "pending" | "approved" | "rejected";
   price: number;
@@ -50,7 +51,7 @@ export default async function ConsultantListingsPage({
 
   const { data: listings } = await supabase
     .from("listings")
-    .select("id, title, status, price, created_at")
+    .select("id, title, status, price, created_at, rejection_reason")
     .eq("consultant_id", user.id)
     .order("created_at", { ascending: false });
 
@@ -107,12 +108,17 @@ export default async function ConsultantListingsPage({
                           }).format(new Date(listing.created_at))}
                         </td>
                         <td>
-                          <Link
-                            className={styles.actionLink}
-                            href={`/consultant/listings/${listing.id}`}
-                          >
-                            View
-                          </Link>
+                          <div className={styles.actionCell}>
+                            <Link
+                              className={styles.actionLink}
+                              href={`/consultant/listings/${listing.id}`}
+                            >
+                              View
+                            </Link>
+                            {listing.status === "rejected" && listing.rejection_reason ? (
+                              <p className={styles.rejectionReason}>{listing.rejection_reason}</p>
+                            ) : null}
+                          </div>
                         </td>
                       </tr>
                     ))}

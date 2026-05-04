@@ -1,8 +1,15 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { isSupabaseConnectivityError } from "@/lib/supabase/errors";
 
 const AUTH_ROUTES = new Set(["/login", "/register"]);
 const USER_PREFIXES = ["/user", "/consultant", "/admin"];
+
+function hasSupabaseAuthCookie(request: NextRequest) {
+  return request.cookies
+    .getAll()
+    .some((cookie) => cookie.name.startsWith("sb-") && cookie.name.includes("auth-token"));
+}
 
 async function getUserRole(request: NextRequest) {
   let response = NextResponse.next({
@@ -30,29 +37,44 @@ async function getUserRole(request: NextRequest) {
     }
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-  if (!user) {
+    if (!user) {
+      return {
+        isSuspended: false,
+        response,
+        role: null,
+        user: null,
+      };
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role, is_suspended")
+      .eq("id", user.id)
+      .maybeSingle();
+
     return {
+      isSuspended: profile?.is_suspended ?? false,
+      response,
+      role: profile?.role ?? null,
+      user,
+    };
+  } catch (error) {
+    if (!isSupabaseConnectivityError(error)) {
+      console.error(error);
+    }
+
+    return {
+      isSuspended: false,
       response,
       role: null,
       user: null,
     };
   }
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  return {
-    response,
-    role: profile?.role ?? null,
-    user,
-  };
 }
 
 function getRedirectPath(role: string | null) {
@@ -76,7 +98,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const { response, role, user } = await getUserRole(request);
+  if (isAuthRoute && !hasSupabaseAuthCookie(request)) {
+    return NextResponse.next();
+  }
+
+  const { isSuspended, response, role, user } = await getUserRole(request);
 
   if (isProtectedRoute && !user) {
     const loginUrl = new URL("/login", request.url);
@@ -84,11 +110,17 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  if (isProtectedRoute && user && isSuspended) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("suspended", "1");
+    return NextResponse.redirect(loginUrl);
+  }
+
   if (pathname.startsWith("/admin") && role !== "admin") {
     return NextResponse.redirect(new URL("/user/dashboard", request.url));
   }
 
-  if (isAuthRoute && user) {
+  if (isAuthRoute && user && !isSuspended) {
     return NextResponse.redirect(new URL(getRedirectPath(role), request.url));
   }
 

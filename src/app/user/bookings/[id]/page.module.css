@@ -1,0 +1,83 @@
+.layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding-bottom: var(--space-16);
+}
+
+.backLink {
+  color: var(--color-magenta);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+}
+
+.header,
+.rescheduleCard {
+  align-items: center;
+  display: flex;
+  gap: var(--space-4);
+  justify-content: space-between;
+}
+
+.eyebrow {
+  color: var(--color-magenta);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  text-transform: uppercase;
+}
+
+.title,
+.sectionTitle,
+.detailValue {
+  color: var(--color-gray-800);
+}
+
+.title {
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
+}
+
+.sectionTitle {
+  font-size: var(--text-xl);
+  font-weight: var(--font-semibold);
+}
+
+.metaText,
+.detailLabel {
+  color: var(--color-gray-600);
+}
+
+.details {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.detailItem {
+  background-color: var(--color-gray-100);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+}
+
+.detailLabel {
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-1);
+}
+
+.detailValue {
+  font-weight: var(--font-semibold);
+}
+
+.meetLink {
+  color: var(--color-magenta);
+  font-weight: var(--font-semibold);
+}
+
+@media (max-width: 768px) {
+  .header,
+  .rescheduleCard {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

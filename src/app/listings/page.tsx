@@ -27,7 +27,7 @@ interface ListingRow {
   status: "pending" | "approved" | "rejected";
   created_at: string;
   updated_at: string;
-  consultant: Pick<Profile, "full_name"> | null;
+  consultant: Array<Pick<Profile, "full_name" | "avatar_url">>;
 }
 
 const CATEGORIES = [
@@ -49,7 +49,7 @@ export default async function ListingsPage({ searchParams }: ListingsPageProps) 
   let listingsQuery = supabase
     .from("listings")
     .select(
-      "id, consultant_id, title, description, price, category, location, featured_image_url, consultation_type, duration_minutes, status, created_at, updated_at, consultant:profiles(full_name)"
+      "id, consultant_id, title, description, price, category, location, featured_image_url, consultation_type, duration_minutes, status, created_at, updated_at, consultant:profiles(full_name, avatar_url)"
     )
     .eq("status", "approved")
     .order("created_at", { ascending: false });
@@ -65,16 +65,45 @@ export default async function ListingsPage({ searchParams }: ListingsPageProps) 
   }
 
   const { data: listingsData } = await listingsQuery;
+  const listingIds = (listingsData ?? []).map((listing) => listing.id);
+
+  let ratingsByListing = new Map<string, { average: number; count: number }>();
+
+  if (listingIds.length > 0) {
+    const { data: reviewRows } = await supabase
+      .from("reviews")
+      .select("listing_id, rating")
+      .in("listing_id", listingIds);
+
+    ratingsByListing = (reviewRows ?? []).reduce((accumulator, review) => {
+      const current = accumulator.get(review.listing_id) ?? { average: 0, count: 0 };
+      const nextCount = current.count + 1;
+      const nextAverage = (current.average * current.count + review.rating) / nextCount;
+      accumulator.set(review.listing_id, {
+        average: nextAverage,
+        count: nextCount,
+      });
+      return accumulator;
+    }, new Map<string, { average: number; count: number }>());
+  }
 
   const listings: Listing[] =
-    listingsData?.map((listing: ListingRow) => ({
-      ...listing,
-      consultant: listing.consultant
-        ? ({
-            full_name: listing.consultant.full_name,
-          } as Profile)
-        : undefined,
-    })) ?? [];
+    ((listingsData as ListingRow[] | null) ?? []).map((listing) => {
+      const rating = ratingsByListing.get(listing.id);
+      const consultant = listing.consultant[0];
+
+      return {
+        ...listing,
+        average_rating: rating?.average,
+        consultant: consultant
+          ? ({
+              avatar_url: consultant.avatar_url,
+              full_name: consultant.full_name,
+            } as Profile)
+          : undefined,
+        review_count: rating?.count,
+      };
+    });
 
   return (
     <>
@@ -122,8 +151,8 @@ export default async function ListingsPage({ searchParams }: ListingsPageProps) 
             </div>
           ) : (
             <EmptyState
-              message="Try a different search."
-              title="No listings found."
+              message="No listings found. Try a different search or category."
+              title="No listings found"
             />
           )}
         </div>

@@ -5,7 +5,8 @@
   padding-bottom: var(--space-16);
 }
 
-.welcome {
+.welcome,
+.metricCard {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
@@ -18,44 +19,38 @@
   text-transform: uppercase;
 }
 
-.name {
+.name,
+.metricValue {
   color: var(--color-gray-800);
+}
+
+.name {
   font-size: var(--text-2xl);
   font-weight: var(--font-bold);
 }
 
-.description {
+.description,
+.metricLabel {
   color: var(--color-gray-600);
-  font-size: var(--text-base);
-  max-width: 720px;
 }
 
-.grid {
+.metricsGrid {
   display: grid;
   gap: var(--space-6);
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-.sectionCard {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  min-height: 160px;
-}
-
-.sectionTitle {
-  color: var(--color-gray-800);
-  font-size: var(--text-lg);
-  font-weight: var(--font-semibold);
-}
-
-.sectionText {
-  color: var(--color-gray-600);
+.metricLabel {
   font-size: var(--text-sm);
 }
 
+.metricValue {
+  font-size: var(--text-4xl);
+  font-weight: var(--font-bold);
+}
+
 @media (max-width: 900px) {
-  .grid {
+  .metricsGrid {
     grid-template-columns: 1fr;
   }
 }

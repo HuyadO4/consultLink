@@ -53,6 +53,12 @@ export default async function ConsultantListingDetailPage({
               <p className={styles.price}>{formatPrice(listing.price)}</p>
             </div>
 
+            {listing.status === "rejected" && listing.rejection_reason ? (
+              <p className={styles.rejectionNotice}>
+                Rejection reason: {listing.rejection_reason}
+              </p>
+            ) : null}
+
             {listing.featured_image_url ? (
               <img
                 alt={listing.title}

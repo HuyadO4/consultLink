@@ -2,21 +2,25 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { FormEvent, Suspense, useMemo, useState } from "react";
 import { Navbar } from "@/components/layout/Navbar/Navbar";
 import { PageContainer } from "@/components/layout/PageContainer/PageContainer";
 import { Button } from "@/components/ui/Button/Button";
 import { Card } from "@/components/ui/Card/Card";
 import { Input } from "@/components/ui/Input/Input";
 import { createClient } from "@/lib/supabase/client";
+import {
+  SUPABASE_CONNECTIVITY_MESSAGE,
+  isSupabaseConnectivityError,
+} from "@/lib/supabase/errors";
 import styles from "./page.module.css";
 
 type IntendedRole = "customer" | "consultant";
 
-export default function RegisterPage() {
+function RegisterPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -67,26 +71,46 @@ export default function RegisterPage() {
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
             full_name: fullName.trim(),
+            role: intendedRole,
           },
         },
       });
 
       if (error) {
-        setFormError("Something went wrong. Please try again.");
+        if (error.message.toLowerCase().includes("already")) {
+          setFormError("An account with this email already exists.");
+        } else {
+          setFormError("Something went wrong. Please try again.");
+        }
         return;
+      }
+
+      if (data.user) {
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .update({ role: intendedRole })
+          .eq("id", data.user.id);
+
+        if (profileError) {
+          console.error(profileError);
+        }
       }
 
       router.push(intendedRole === "consultant" ? "/consultant/dashboard" : "/listings");
       router.refresh();
     } catch (error) {
       console.error(error);
-      setFormError("Something went wrong. Please try again.");
+      setFormError(
+        isSupabaseConnectivityError(error)
+          ? SUPABASE_CONNECTIVITY_MESSAGE
+          : "Something went wrong. Please try again."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -179,5 +203,29 @@ export default function RegisterPage() {
         </div>
       </PageContainer>
     </>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense
+      fallback={
+        <>
+          <Navbar currentPath="/register" />
+          <PageContainer>
+            <div className={styles.wrapper}>
+              <Card className={styles.card}>
+                <div className={styles.header}>
+                  <h1 className={styles.title}>Create your account</h1>
+                  <p className={styles.subtitle}>Loading registration form...</p>
+                </div>
+              </Card>
+            </div>
+          </PageContainer>
+        </>
+      }
+    >
+      <RegisterPageContent />
+    </Suspense>
   );
 }

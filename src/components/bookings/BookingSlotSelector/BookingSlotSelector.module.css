@@ -1,0 +1,53 @@
+.layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.sectionLabel {
+  color: var(--color-gray-800);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+}
+
+.dateGrid,
+.timeGrid {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+}
+
+.dateButton,
+.timeButton {
+  background-color: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-lg);
+  color: var(--color-gray-800);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  min-height: 52px;
+  padding: var(--space-3);
+  text-align: center;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease;
+}
+
+.dateButtonActive,
+.timeButtonActive {
+  background-color: var(--color-magenta-light);
+  border-color: var(--color-magenta);
+  color: var(--color-magenta);
+}
+
+.emptyText {
+  color: var(--color-gray-600);
+  font-size: var(--text-sm);
+}

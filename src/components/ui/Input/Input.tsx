@@ -10,17 +10,15 @@ interface BaseInputProps {
   name: string;
 }
 
-interface TextInputProps
-  extends BaseInputProps,
-    InputHTMLAttributes<HTMLInputElement> {
+type TextInputProps = BaseInputProps &
+  Omit<InputHTMLAttributes<HTMLInputElement>, "name"> & {
   multiline?: false;
-}
+};
 
-interface TextAreaProps
-  extends BaseInputProps,
-    TextareaHTMLAttributes<HTMLTextAreaElement> {
+type TextAreaProps = BaseInputProps &
+  Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "name"> & {
   multiline: true;
-}
+};
 
 type InputProps = TextInputProps | TextAreaProps;
 
@@ -28,13 +26,15 @@ export function Input(props: InputProps) {
   const { error, helperText, label, multiline = false, name, ...fieldProps } = props;
   const hint = error ?? helperText;
   const describedBy = hint ? `${name}-hint` : undefined;
+  const textareaProps = fieldProps as TextareaHTMLAttributes<HTMLTextAreaElement>;
+  const inputProps = fieldProps as InputHTMLAttributes<HTMLInputElement>;
 
   return (
     <label className={styles.wrapper} htmlFor={name}>
       <span className={styles.label}>{label}</span>
       {multiline ? (
         <textarea
-          {...fieldProps}
+          {...textareaProps}
           aria-describedby={describedBy}
           aria-invalid={Boolean(error)}
           className={`${styles.field} ${styles.textarea} ${error ? styles.errorField : ""}`}
@@ -43,7 +43,7 @@ export function Input(props: InputProps) {
         />
       ) : (
         <input
-          {...fieldProps}
+          {...inputProps}
           aria-describedby={describedBy}
           aria-invalid={Boolean(error)}
           className={`${styles.field} ${error ? styles.errorField : ""}`}
