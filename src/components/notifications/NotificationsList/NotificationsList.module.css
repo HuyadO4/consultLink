@@ -1,0 +1,60 @@
+.layout {
+  display: grid;
+  gap: 1rem;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.list {
+  display: grid;
+  gap: 1rem;
+}
+
+.card {
+  width: 100%;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  border-radius: 1rem;
+  background: #fff;
+  padding: 1rem 1.1rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.unread {
+  border-color: rgba(209, 46, 106, 0.35);
+  box-shadow: 0 0 0 1px rgba(209, 46, 106, 0.08);
+}
+
+.read {
+  opacity: 0.92;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+}
+
+.title {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.badge {
+  border-radius: 999px;
+  background: #fde7ef;
+  color: #9e1b52;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.body,
+.date {
+  margin: 0.5rem 0 0;
+  color: rgba(15, 23, 42, 0.72);
+}

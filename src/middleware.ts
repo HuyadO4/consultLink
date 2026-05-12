@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { isSupabaseConnectivityError } from "@/lib/supabase/errors";
 
 const AUTH_ROUTES = new Set(["/login", "/register"]);
-const USER_PREFIXES = ["/user", "/consultant", "/admin"];
+const USER_PREFIXES = ["/user", "/consultant", "/admin", "/notifications"];
 
 function hasSupabaseAuthCookie(request: NextRequest) {
   return request.cookies
@@ -89,6 +89,26 @@ function getRedirectPath(role: string | null) {
   return "/user/dashboard";
 }
 
+function canAccessPath(pathname: string, role: string | null) {
+  if (pathname.startsWith("/admin")) {
+    return role === "admin";
+  }
+
+  if (pathname.startsWith("/consultant")) {
+    return role === "consultant";
+  }
+
+  if (pathname.startsWith("/user")) {
+    return role === "customer";
+  }
+
+  if (pathname.startsWith("/notifications")) {
+    return role === "admin" || role === "consultant" || role === "customer";
+  }
+
+  return true;
+}
+
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const isProtectedRoute = USER_PREFIXES.some((prefix) => pathname.startsWith(prefix));
@@ -116,8 +136,16 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  if (pathname.startsWith("/admin") && role !== "admin") {
-    return NextResponse.redirect(new URL("/user/dashboard", request.url));
+  if (isProtectedRoute && user && !role) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  if (isProtectedRoute && user && !canAccessPath(pathname, role)) {
+    return NextResponse.redirect(new URL(getRedirectPath(role), request.url));
+  }
+
+  if (isAuthRoute && user && !role) {
+    return response;
   }
 
   if (isAuthRoute && user && !isSuspended) {
@@ -128,5 +156,12 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/login", "/register", "/user/:path*", "/consultant/:path*", "/admin/:path*"],
+  matcher: [
+    "/login",
+    "/register",
+    "/user/:path*",
+    "/consultant/:path*",
+    "/admin/:path*",
+    "/notifications/:path*",
+  ],
 };

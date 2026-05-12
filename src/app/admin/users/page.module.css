@@ -1,0 +1,32 @@
+.layout {
+  display: grid;
+  gap: 1rem;
+}
+
+.heading,
+.title {
+  margin: 0;
+}
+
+.copy,
+.metaText {
+  color: rgba(15, 23, 42, 0.72);
+}
+
+.list {
+  display: grid;
+  gap: 1rem;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+@media (max-width: 720px) {
+  .row {
+    flex-direction: column;
+  }
+}

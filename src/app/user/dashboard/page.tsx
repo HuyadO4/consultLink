@@ -5,6 +5,8 @@ import { PageContainer } from "@/components/layout/PageContainer/PageContainer";
 import { Card } from "@/components/ui/Card/Card";
 import { EmptyState } from "@/components/ui/EmptyState/EmptyState";
 import { getBookingStatusLabel } from "@/lib/bookings";
+import { adminClient } from "@/lib/supabase/admin";
+import { repairPaidInitiatedBookings } from "@/lib/payments";
 import { createClient } from "@/lib/supabase/server";
 import { formatDateTime } from "@/lib/utils/date";
 import styles from "./page.module.css";
@@ -29,7 +31,7 @@ export default async function UserDashboardPage() {
     redirect("/login");
   }
 
-  const { data: profile } = await supabase
+  const { data: profile } = await adminClient
     .from("profiles")
     .select("full_name, is_suspended")
     .eq("id", user.id)
@@ -39,15 +41,21 @@ export default async function UserDashboardPage() {
     redirect("/login?suspended=1");
   }
 
-  const { data: bookings } = await supabase
+  await repairPaidInitiatedBookings({
+    customerId: user.id,
+  });
+
+  const { data: bookings } = await adminClient
     .from("bookings")
     .select("id, scheduled_date, start_time, status, listing:listings(title)")
     .eq("customer_id", user.id)
-    .in("status", ["pending", "approved"])
+    .neq("status", "initiated")
     .order("scheduled_date", { ascending: true })
     .order("start_time", { ascending: true });
 
-  const upcomingBookings = (bookings ?? []) as unknown as BookingRow[];
+  const upcomingBookings = ((bookings ?? []) as unknown as BookingRow[]).filter(
+    (booking) => booking.status === "pending" || booking.status === "approved"
+  );
 
   return (
     <>

@@ -92,17 +92,12 @@ function RegisterPageContent() {
       }
 
       if (data.user) {
-        const { error: profileError } = await supabase
-          .from("profiles")
-          .update({ role: intendedRole })
-          .eq("id", data.user.id);
-
-        if (profileError) {
-          console.error(profileError);
-        }
+        const nextDashboard =
+          intendedRole === "consultant" ? "/consultant/dashboard" : "/user/dashboard";
+        router.push(nextDashboard);
+      } else {
+        router.push("/login");
       }
-
-      router.push(intendedRole === "consultant" ? "/consultant/dashboard" : "/listings");
       router.refresh();
     } catch (error) {
       console.error(error);

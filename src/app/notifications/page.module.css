@@ -1,0 +1,12 @@
+.layout {
+  display: grid;
+  gap: 1rem;
+}
+
+.heading {
+  margin: 0;
+}
+
+.copy {
+  color: rgba(15, 23, 42, 0.72);
+}

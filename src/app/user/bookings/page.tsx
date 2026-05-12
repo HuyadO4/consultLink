@@ -10,6 +10,8 @@ import {
   getBookingStatusVariant,
   getPaymentStatusLabel,
 } from "@/lib/bookings";
+import { adminClient } from "@/lib/supabase/admin";
+import { repairPaidInitiatedBookings } from "@/lib/payments";
 import { createClient } from "@/lib/supabase/server";
 import { formatDateTime } from "@/lib/utils/date";
 import styles from "./page.module.css";
@@ -57,7 +59,11 @@ export default async function UserBookingsPage() {
     redirect("/login");
   }
 
-  const { data: bookings } = await supabase
+  await repairPaidInitiatedBookings({
+    customerId: user.id,
+  });
+
+  const { data: bookings } = await adminClient
     .from("bookings")
     .select(
       "id, scheduled_date, start_time, status, payment_status, listing:listings(title), consultant:profiles(full_name)"

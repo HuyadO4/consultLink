@@ -34,6 +34,26 @@ interface PaystackVerifyPayload {
   status?: boolean;
 }
 
+interface RefundTransactionArgs {
+  amount?: number;
+  reference: string;
+  reason?: string;
+}
+
+interface RefundTransactionData {
+  amount?: number;
+  currency?: string;
+  id?: number;
+  reference?: string;
+  status?: string;
+}
+
+interface PaystackRefundPayload {
+  data?: RefundTransactionData;
+  message?: string;
+  status?: boolean;
+}
+
 const PAYSTACK_API_BASE_URL = "https://api.paystack.co";
 
 function getPaystackSecretKey() {
@@ -114,6 +134,38 @@ export async function verifyPaystackTransaction(
   }
 
   return payload.data;
+}
+
+export async function refundPaystackTransaction({
+  amount,
+  reference,
+  reason,
+}: RefundTransactionArgs): Promise<RefundTransactionData> {
+  const payloadBody: Record<string, string | number> = {
+    transaction: reference,
+  };
+
+  if (typeof amount === "number") {
+    payloadBody.amount = amount;
+  }
+
+  if (reason) {
+    payloadBody.customer_note = reason;
+  }
+
+  const { payload, response } = await paystackRequest<PaystackRefundPayload>("/refund", {
+    body: JSON.stringify(payloadBody),
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+  });
+
+  if (!response.ok || !payload.status) {
+    throw new Error(payload.message ?? "Unable to initialize Paystack refund");
+  }
+
+  return payload.data ?? {};
 }
 
 export function isValidPaystackSignature(rawBody: string, signature: string | null) {

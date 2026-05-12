@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { Navbar } from "@/components/layout/Navbar/Navbar";
 import { PageContainer } from "@/components/layout/PageContainer/PageContainer";
 import { RescheduleBooking } from "@/components/bookings/RescheduleBooking/RescheduleBooking";
+import { ReviewForm } from "@/components/reviews/ReviewForm/ReviewForm";
 import { Badge } from "@/components/ui/Badge/Badge";
 import { Card } from "@/components/ui/Card/Card";
 import {
@@ -10,8 +11,9 @@ import {
   getBookingStatusVariant,
   getPaymentStatusLabel,
 } from "@/lib/bookings";
+import { adminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import { formatDateTime } from "@/lib/utils/date";
+import { formatDateTime, isPast } from "@/lib/utils/date";
 import styles from "./page.module.css";
 
 interface BookingDetailPageProps {
@@ -58,7 +60,7 @@ export default async function UserBookingDetailPage({ params }: BookingDetailPag
     redirect("/login");
   }
 
-  const { data: booking } = await supabase
+  const { data: booking } = await adminClient
     .from("bookings")
     .select(
       "id, scheduled_date, start_time, end_time, status, payment_status, consultation_type, meet_link, listing:listings(id, title, location, duration_minutes), consultant:profiles(full_name)"
@@ -80,6 +82,15 @@ export default async function UserBookingDetailPage({ params }: BookingDetailPag
     bookingDetail.consultation_type === "virtual" &&
     bookingDetail.status === "approved" &&
     bookingDetail.meet_link;
+  const { data: existingReview } = await adminClient
+    .from("reviews")
+    .select("id")
+    .eq("booking_id", bookingDetail.id)
+    .maybeSingle();
+  const canLeaveReview =
+    !existingReview &&
+    ["approved", "completed"].includes(bookingDetail.status) &&
+    isPast(bookingDetail.scheduled_date, bookingDetail.end_time);
 
   return (
     <>
@@ -166,6 +177,31 @@ export default async function UserBookingDetailPage({ params }: BookingDetailPag
                   </p>
                 </div>
                 <RescheduleBooking bookingId={bookingDetail.id} listingId={rescheduleListingId} />
+              </div>
+            </Card>
+          ) : null}
+
+          {canLeaveReview ? (
+            <Card>
+              <div className={styles.rescheduleCard}>
+                <div>
+                  <h3 className={styles.sectionTitle}>Leave a review</h3>
+                  <p className={styles.metaText}>
+                    Share a rating and optional comment to help other customers book with confidence.
+                  </p>
+                </div>
+                <ReviewForm bookingId={bookingDetail.id} />
+              </div>
+            </Card>
+          ) : existingReview ? (
+            <Card>
+              <div className={styles.rescheduleCard}>
+                <div>
+                  <h3 className={styles.sectionTitle}>Review submitted</h3>
+                  <p className={styles.metaText}>
+                    You have already shared feedback for this session.
+                  </p>
+                </div>
               </div>
             </Card>
           ) : null}

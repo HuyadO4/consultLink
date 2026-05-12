@@ -1,9 +1,12 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { ConsultantBookingActions } from "@/components/bookings/ConsultantBookingActions/ConsultantBookingActions";
 import { Navbar } from "@/components/layout/Navbar/Navbar";
 import { PageContainer } from "@/components/layout/PageContainer/PageContainer";
 import { Card } from "@/components/ui/Card/Card";
 import { EmptyState } from "@/components/ui/EmptyState/EmptyState";
+import { adminClient } from "@/lib/supabase/admin";
+import { repairPaidInitiatedBookings } from "@/lib/payments";
 import { createClient } from "@/lib/supabase/server";
 import { formatDateTime } from "@/lib/utils/date";
 import styles from "./page.module.css";
@@ -13,9 +16,13 @@ interface ListingStatusRow {
 }
 
 interface BookingRow {
+  consultation_type: "physical" | "virtual";
   id: string;
+  meet_link: string | null;
+  meeting_link_status: "available" | "manual_required" | "not_required" | "pending_generation";
   scheduled_date: string;
   start_time: string;
+  status: "approved" | "pending";
   listing: Array<{
     title: string;
   }>;
@@ -31,7 +38,7 @@ export default async function ConsultantDashboardPage() {
     redirect("/login");
   }
 
-  const { data: profile } = await supabase
+  const { data: profile } = await adminClient
     .from("profiles")
     .select("full_name, is_suspended")
     .eq("id", user.id)
@@ -41,14 +48,29 @@ export default async function ConsultantDashboardPage() {
     redirect("/login?suspended=1");
   }
 
-  const { data: listings } = await supabase
+  await repairPaidInitiatedBookings({
+    consultantId: user.id,
+  });
+
+  const { data: listings } = await adminClient
     .from("listings")
     .select("status")
     .eq("consultant_id", user.id);
 
-  const { data: upcomingBookings } = await supabase
+  const { data: pendingBookings } = await adminClient
     .from("bookings")
-    .select("id, scheduled_date, start_time, listing:listings(title)")
+    .select(
+      "consultation_type, id, meet_link, meeting_link_status, scheduled_date, start_time, status, listing:listings(title)"
+    )
+    .eq("consultant_id", user.id)
+    .eq("status", "pending")
+    .order("scheduled_date", { ascending: true })
+    .order("start_time", { ascending: true })
+    .limit(5);
+
+  const { data: upcomingBookings } = await adminClient
+    .from("bookings")
+    .select("id, scheduled_date, start_time, status, listing:listings(title)")
     .eq("consultant_id", user.id)
     .eq("status", "approved")
     .order("scheduled_date", { ascending: true })
@@ -59,6 +81,7 @@ export default async function ConsultantDashboardPage() {
   const pendingCount = listingRows.filter((listing) => listing.status === "pending").length;
   const approvedCount = listingRows.filter((listing) => listing.status === "approved").length;
   const rejectedCount = listingRows.filter((listing) => listing.status === "rejected").length;
+  const pendingBookingRows = (pendingBookings ?? []) as BookingRow[];
   const bookingRows = (upcomingBookings ?? []) as BookingRow[];
 
   return (
@@ -95,6 +118,59 @@ export default async function ConsultantDashboardPage() {
                 <p className={styles.metricValue}>{rejectedCount}</p>
               </div>
             </Card>
+          </section>
+
+          <section className={styles.section}>
+            <div className={styles.sectionHeader}>
+              <div>
+                <h3 className={styles.sectionTitle}>Incoming booking requests</h3>
+                <p className={styles.sectionText}>
+                  Newly paid bookings waiting for your approval appear here.
+                </p>
+              </div>
+              <Link className={styles.primaryLink} href="/consultant/bookings?status=pending">
+                Review requests
+              </Link>
+            </div>
+
+            {pendingBookingRows.length > 0 ? (
+              <div className={styles.list}>
+                {pendingBookingRows.map((booking) => (
+                  <Card key={booking.id}>
+                    <div className={styles.bookingRow}>
+                      <div>
+                        <h4 className={styles.bookingTitle}>
+                          {booking.listing[0]?.title ?? "Consultation"}
+                        </h4>
+                        <p className={styles.bookingMeta}>
+                          {formatDateTime(booking.scheduled_date, booking.start_time)}
+                        </p>
+                      </div>
+                      <span className={styles.bookingStatus}>Awaiting Approval</span>
+                    </div>
+                    <div className={styles.inlineManager}>
+                      <ConsultantBookingActions
+                        bookingId={booking.id}
+                        consultationType={booking.consultation_type}
+                        meetLink={booking.meet_link}
+                        meetingLinkStatus={booking.meeting_link_status}
+                        status={booking.status}
+                      />
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                action={
+                  <Link className={styles.primaryLink} href="/consultant/bookings">
+                    View all bookings
+                  </Link>
+                }
+                message="Paid booking requests from customers will show up here as soon as they come in."
+                title="No incoming booking requests"
+              />
+            )}
           </section>
 
           <section className={styles.section}>

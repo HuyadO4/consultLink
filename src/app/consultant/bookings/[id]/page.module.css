@@ -1,0 +1,54 @@
+.layout {
+  display: grid;
+  gap: 1rem;
+}
+
+.backLink {
+  text-decoration: none;
+  color: #9e1b52;
+  font-weight: 600;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.eyebrow,
+.label,
+.metaText {
+  color: rgba(15, 23, 42, 0.72);
+}
+
+.title,
+.sectionTitle {
+  margin: 0;
+}
+
+.details {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.value {
+  margin: 0.3rem 0 0;
+}
+
+.rejectionNotice {
+  margin: 1rem 0 0;
+  color: #b42318;
+}
+
+.actionsCard {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (max-width: 720px) {
+  .header {
+    flex-direction: column;
+  }
+}

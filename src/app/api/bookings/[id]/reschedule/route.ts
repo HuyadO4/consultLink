@@ -187,7 +187,7 @@ export async function POST(
     )}.`,
     related_booking_id: booking.id,
     title: "Booking rescheduled",
-    type: "booking_created",
+    type: "booking_rescheduled",
     user_id: booking.consultant_id,
   });
 

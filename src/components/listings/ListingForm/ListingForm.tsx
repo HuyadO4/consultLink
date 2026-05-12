@@ -162,8 +162,6 @@ export function ListingForm({ consultantId }: ListingFormProps) {
         return;
       }
 
-      await supabase.from("profiles").update({ role: "consultant" }).eq("id", user.id);
-
       setUploadProgress(100);
       router.push("/consultant/listings?created=1");
       router.refresh();

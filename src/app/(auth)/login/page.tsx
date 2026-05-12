@@ -77,15 +77,25 @@ function LoginPageContent() {
         return;
       }
 
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("role, is_suspended")
         .eq("id", user.id)
         .maybeSingle();
 
+      if (profileError) {
+        console.error(profileError);
+      }
+
       if (profile?.is_suspended) {
         await supabase.auth.signOut();
         setFormError(suspendedMessage);
+        return;
+      }
+
+      if (!profile?.role) {
+        await supabase.auth.signOut();
+        setFormError("We could not load your account. Please contact support.");
         return;
       }
 

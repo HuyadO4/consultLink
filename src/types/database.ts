@@ -14,9 +14,18 @@ export type NotificationType =
   | "booking_created"
   | "booking_approved"
   | "booking_rejected"
+  | "booking_rescheduled"
+  | "booking_expired"
   | "payment_success"
   | "payment_refunded"
+  | "meeting_link_manual_required"
   | "session_reminder";
+
+export type MeetingLinkStatus =
+  | "not_required"
+  | "pending_generation"
+  | "manual_required"
+  | "available";
 
 export interface Profile {
   id: string;
@@ -73,7 +82,9 @@ export interface Booking {
   payment_status: PaymentStatus;
   amount_paid: number | null;
   meet_link: string | null;
+  meeting_link_status: MeetingLinkStatus;
   consultant_notes: string | null;
+  rejection_reason: string | null;
   approval_deadline: string | null;
   created_at: string;
   updated_at: string;

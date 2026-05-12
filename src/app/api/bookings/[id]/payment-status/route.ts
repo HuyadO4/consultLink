@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 import { adminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { PAYMENT_INCOMPLETE_MESSAGE } from "@/lib/bookings";
+import { finalizeBookingPayment } from "@/lib/payments";
 import { verifyPaystackTransaction } from "@/lib/paystack";
-import type { ApiResponse, Booking, PaymentStatus } from "@/types";
+import type { ApiResponse, Booking, Listing, PaymentStatus } from "@/types";
 
 interface PaymentStatusData {
   message: string | null;
@@ -12,6 +13,7 @@ interface PaymentStatusData {
 
 interface BookingRow {
   id: string;
+  listing: Array<Pick<Listing, "price">>;
   payment_reference: string | null;
   payment_status: PaymentStatus;
   status: Booking["status"];
@@ -39,7 +41,7 @@ export async function GET(
   const { id } = await params;
   const { data: booking } = await adminClient
     .from("bookings")
-    .select("id, payment_reference, payment_status, status")
+    .select("id, listing:listings(price), payment_reference, payment_status, status")
     .eq("id", id)
     .eq("customer_id", user.id)
     .maybeSingle<BookingRow>();
@@ -77,6 +79,24 @@ export async function GET(
   try {
     const paymentReference = booking.payment_reference;
     const transaction = await verifyPaystackTransaction(paymentReference);
+
+    if (transaction.status === "success" && typeof transaction.amount === "number") {
+      const finalization = await finalizeBookingPayment({
+        amount: transaction.amount,
+        bookingId: booking.id,
+        paymentReference,
+      });
+
+      if (finalization.confirmed) {
+        return NextResponse.json<ApiResponse<PaymentStatusData>>({
+          data: {
+            message: null,
+            state: "confirmed",
+          },
+          error: null,
+        });
+      }
+    }
 
     if (["abandoned", "failed", "reversed"].includes(transaction.status)) {
       await adminClient
